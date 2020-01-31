@@ -1,16 +1,15 @@
-from flask import Flask, render_template, request
+from flask import Flask, Response, render_template, request
 from io import BytesIO, StringIO
 from matplotlib import pyplot as plt
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
 from scipy.cluster.hierarchy import dendrogram, linkage
+from werkzeug import FileWrapper
 
 import csv
 import numpy as np
 import requests
 import sys
-
-# https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/
 
 app = Flask(__name__)
 
@@ -20,8 +19,6 @@ def get_google_sheets_csv_url(u):
     to-  https://docs.google.com/spreadsheets/d/1s2Q0wC1TheZIahkw_Ly876pZUNCUZv82bVMu2A9f774/gviz/tq?tqx=out:csv
     """
     pieces = u.split('/')[:6]
-    # pieces.append('gviz')
-    # pieces.append('tq?tqx=out:csv')
     pieces.append('export?format=csv')
     return '/'.join(pieces)
 
@@ -44,16 +41,13 @@ def form():
 
 @app.route("/cluster", methods=["POST"])
 def cluster():
-    # url = request.form["url"]
-    url = 'https://docs.google.com/spreadsheets/d/1s2Q0wC1TheZIahkw_Ly876pZUNCUZv82bVMu2A9f774/edit?usp=sharing'
-    url = get_google_sheets_csv_url(url)
+    url = get_google_sheets_csv_url(request.form["url"])
 
-    # r = requests.head(url, allow_redirects=True)
     csv_string = requests.get(url).text
 
     # catch errors: the url might not be public. 
     if '<!DOCTYPE html>' in csv_string:
-        print('not public!')
+        return render_template('error.html')
 
     f = StringIO(csv_string)
     reader = csv.reader(f, delimiter=",")
@@ -116,8 +110,7 @@ def cluster():
             x += 1
         y += 1
 
-    # or 'complete'
-    l = linkage(data, 'single')
+    l = linkage(data, request.form["linkage"])
     d = dendrogram(l) 
 
     # sort the matrix based on dendrogram order.
@@ -144,8 +137,13 @@ def cluster():
 
     f = BytesIO()
     wb.save(f)
-    send_file(f, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    f.seek(0)
+    w = FileWrapper(f)
+    try:
+        return Response(w, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", direct_passthrough=True)
+    except Exception as e:
+        return str(e)
 
 if __name__ == "__main__":
-    # Only for debugging while developing
+    # debug only
     app.run(host='0.0.0.0', debug=True, port=80)
