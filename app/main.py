@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Flask, Response, render_template, request
 from io import BytesIO, StringIO
 from matplotlib import pyplot as plt
@@ -16,7 +17,12 @@ import requests
 import string
 import sys
 
+# TODO
+
+# get this running in Docker.
+
 app = Flask(__name__)
+
 # set matplotlib to use a non-interactive backend- i.e., don't try to create windows on the server.
 matplotlib.use('agg')
 
@@ -117,6 +123,9 @@ def form():
 
 @app.route("/cluster", methods=["POST"])
 def cluster():
+    # clear the current figure- so repeated requests to the service will render correctly.
+    plt.clf()
+
     if request.form['url'] == '':
         return render_template('error.html')
 
