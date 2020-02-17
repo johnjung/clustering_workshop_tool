@@ -5,15 +5,20 @@ from networkx.drawing.nx_agraph import graphviz_layout
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
 from scipy.cluster.hierarchy import dendrogram, linkage
-from werkzeug import FileWrapper
+from werkzeug.wsgi import FileWrapper
 
 import csv
+import matplotlib
 import networkx
 import numpy as np
+import random
 import requests
+import string
 import sys
 
 app = Flask(__name__)
+# set matplotlib to use a non-interactive backend- i.e., don't try to create windows on the server.
+matplotlib.use('agg')
 
 def get_google_sheets_csv_url(u):
     """
@@ -32,26 +37,16 @@ def get_hex(value, max_value):
     r = float(value) / float(max_value)
     h =  hex(int(255 - (128.0 * r))).upper()[2:]
     return 'FF{0}{0}'.format(h)
-  
 
-@app.route("/")
-def form():
-    """
-    Display a webform to the user.
-    """
-    return render_template('form.html')
+def get_random_filename():
+    return ''.join(random.choice(string.ascii_lowercase) for i in range(8))
 
-@app.route("/cluster", methods=["POST"])
-def cluster():
-    url = get_google_sheets_csv_url(request.form["url"])
-
-    csv_string = requests.get(url).text
-
+def get_headers_data_maxvalue(csvstring):
     # catch errors: the url might not be public. 
-    if '<!DOCTYPE html>' in csv_string:
+    if '<!DOCTYPE html>' in csvstring:
         return render_template('error.html')
 
-    f = StringIO(csv_string)
+    f = StringIO(csvstring)
     reader = csv.reader(f, delimiter=",")
 
     headings_1 = next(reader)[1:]
@@ -111,15 +106,32 @@ def cluster():
                 data[x][y] = 0
             x += 1
         y += 1
+    return headings_1, data, max_value
 
-    l = linkage(data, request.form['linkage'])
-    d = dendrogram(
-        l,  
-        above_threshold_color='k', 
-        color_threshold=0, 
-        labels=headings_1,
-        orientation='left'
-    ) 
+@app.route("/")
+def form():
+    """
+    Display a webform to the user.
+    """
+    return render_template('form.html')
+
+@app.route("/cluster", methods=["POST"])
+def cluster():
+    if request.form['url'] == '':
+        return render_template('error.html')
+
+    url = get_google_sheets_csv_url(request.form["url"])
+    headers, data, max_value = get_headers_data_maxvalue(requests.get(url).text)
+
+    if request.form['output'] in ('matrix', 'dendrogram'):
+        l = linkage(data, request.form['linkage'])
+        d = dendrogram(
+            l,  
+            above_threshold_color='k', 
+            color_threshold=0, 
+            labels=headers,
+            orientation='left'
+        ) 
 
     if request.form['output'] == 'matrix':
         # sort the matrix based on dendrogram order.
@@ -136,13 +148,12 @@ def cluster():
         for y in range(len(data_out)):            
             for x in range(len(data_out)):            
                 cell = ws.cell(row=y+2, column=x+2, value=data_out[y][x])
-                print(get_hex(data_out[y][x], max_value))
                 color = get_hex(data_out[y][x], max_value)
                 cell.fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
     
         for i in range(len(data_out)):
-            ws.cell(row=1, column=i+2, value=headings_1[d['leaves'][i]])
-            ws.cell(row=i+2, column=1, value=headings_1[d['leaves'][i]])
+            ws.cell(row=1, column=i+2, value=headers[d['leaves'][i]])
+            ws.cell(row=i+2, column=1, value=headers[d['leaves'][i]])
     
         f = BytesIO()
         wb.save(f)
@@ -159,19 +170,19 @@ def cluster():
         f.seek(0)
         w = FileWrapper(f)
         try:
-            r = Response(w, mimetype="mage/svg+xml", direct_passthrough=True)
-            r.headers['Content-Disposition: attachment; filename="output.svg"']
+            r = Response(w, mimetype="image/svg+xml", direct_passthrough=True)
+            r.headers['Content-Disposition'] = 'attachment; filename="{}.svg"'.format(get_random_filename())
             return r
         except Exception as e:
             return str(e)
     elif request.form['output'] == 'graph':
         g = networkx.Graph()
-        for a in range(len(labels)):
-            g.add_node(labels[a])
+        for a in range(len(headers)):
+            g.add_node(headers[a])
             for b in range(a):
-                if data[labels[a]][labels[b]] >= cutoff:
-                    g.add_edge(labels[a], labels[b])
-                    g.add_edge(labels[b], labels[a])
+                if data[a][b] >= int(request.form['cutoff']):
+                    g.add_edge(headers[a], headers[b])
+                    g.add_edge(headers[b], headers[a])
     
         pos = graphviz_layout(g, prog='neato')
     
@@ -185,8 +196,8 @@ def cluster():
         f.seek(0)
         w = FileWrapper(f)
         try:
-            r = Response(w, mimetype="mage/svg+xml", direct_passthrough=True)
-            r.headers['Content-Disposition: attachment; filename="output.svg"']
+            r = Response(w, mimetype="image/svg+xml", direct_passthrough=True)
+            r.headers['Content-Disposition'] = 'attachment; filename="{}.svg"'.format(get_random_filename())
             return r
         except Exception as e:
             return str(e)

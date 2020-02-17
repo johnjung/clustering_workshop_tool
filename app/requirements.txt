@@ -2,6 +2,7 @@ flask
 matplotlib
 networkx
 openpyxl
+pygraphviz
 requests
 scipy
 werkzeug
