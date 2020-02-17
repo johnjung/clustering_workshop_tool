@@ -17,10 +17,6 @@ import requests
 import string
 import sys
 
-# TODO
-
-# get this running in Docker.
-
 app = Flask(__name__)
 
 # set matplotlib to use a non-interactive backend- i.e., don't try to create windows on the server.
@@ -213,6 +209,8 @@ def cluster():
     else:
         raise NotImplementedError
 
+'''
 if __name__ == "__main__":
     # debug only
     app.run(host='0.0.0.0', debug=True, port=80)
+'''
