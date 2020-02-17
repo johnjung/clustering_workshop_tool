@@ -19,6 +19,10 @@ import sys
 
 app = Flask(__name__)
 
+# TODO
+# see: https://docs.google.com/spreadsheets/d/1IeN0K6LpULcYiqetBl4koNZA1PkKx-NftKgBr0PNxzc/edit#gid=1467402753
+# the labels are a bit long for the graph. Is there anything I can do to help that? 
+
 # set matplotlib to use a non-interactive backend- i.e., don't try to create windows on the server.
 matplotlib.use('agg')
 
@@ -72,7 +76,10 @@ def get_headers_data_maxvalue(csvstring):
         data.append(tmp_row)
 
     # labels must be in the right orders, in the right positions.  
-    assert headings_1 == headings_2 
+    try:
+        assert headings_1 == headings_2 
+    except:
+        return ' '.join(headings_1) + ' !!! ' + ' '.join(headings_2)
 
     # get the maximum value from the input data.
     max_value = 0
