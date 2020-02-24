@@ -1,0 +1,7 @@
+install.packages('GGally', repos='https://ftp.ussg.iu.edu/CRAN/')
+install.packages('ggdendro', repos='https://ftp.ussg.iu.edu/CRAN/')
+install.packages('ggplot2', repos='https://ftp.ussg.iu.edu/CRAN/')
+install.packages('svglite', repos='https://ftp.ussg.iu.edu/CRAN/')
+install.packages('network', repos='https://ftp.ussg.iu.edu/CRAN/')
+install.packages('sna', repos='https://ftp.ussg.iu.edu/CRAN/')
+install.packages('textshape', repos='https://ftp.ussg.iu.edu/CRAN/')
