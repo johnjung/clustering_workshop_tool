@@ -221,3 +221,23 @@ if __name__ == "__main__":
     # debug only
     app.run(host='0.0.0.0', debug=True, port=80)
 '''
+
+'''
+# use named temporary files to get the output of r commands.
+import subprocess, sys, tempfile
+
+with tempfile.NamedTemporaryFile() as f:
+    subprocess.call(
+        [
+            '/usr/local/bin/rscript',
+            'graph.r',
+            '1',
+            'https://docs.google.com/spreadsheets/d/1IeN0K6LpULcYiqetBl4koNZA1PkKx-NftKgBr0PNxzc/gviz/tq?tqx=out:csv',
+            f.name
+        ]
+    )
+    f.seek(0)
+    sys.stdout.write(
+        f.read()
+    )
+'''

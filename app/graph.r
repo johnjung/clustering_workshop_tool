@@ -1,7 +1,7 @@
 # usage:
-#     rscript graph.r <cutoff> <url>
+#     rscript graph.r <cutoff> <url> <output_file>
 # e.g. (complete, single)
-#     rscript graph.r 1 "https://docs.google.com/spreadsheets/d/1IeN0K6LpULcYiqetBl4koNZA1PkKx-NftKgBr0PNxzc/gviz/tq?tqx=out:csv"
+#     rscript graph.r 1 "https://docs.google.com/spreadsheets/d/1IeN0K6LpULcYiqetBl4koNZA1PkKx-NftKgBr0PNxzc/gviz/tq?tqx=out:csv" out.svg
 # outputs an SVG to stdout.
 
 library('GGally')
@@ -16,6 +16,7 @@ library('textshape')
 args = commandArgs(trailingOnly=TRUE)
 cutoff <- args[1]
 url <- args[2]
+output_filename <- args[3]
 
 my_matrix <- as.matrix(read.table(url, header=TRUE, row.names=1, sep=","))
 for (i in 1:nrow(my_matrix)) {
@@ -39,4 +40,4 @@ my_df = data.frame(column_a, column_b)
 
 adjacency_matrix = get.adjacency(graph.edgelist(as.matrix(my_df), directed=FALSE))
 image <- ggnet2(adjacency_matrix, label=TRUE)
-ggsave(file='/dev/stdout', device='svg', plot=image, width=22, height=17)
+ggsave(file=output_filename, device='svg', plot=image, width=22, height=17)
