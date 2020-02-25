@@ -38,6 +38,6 @@ for (n in which(my_matrix <= cutoff)) {
 }
 my_df = data.frame(column_a, column_b)
 
-adjacency_matrix = get.adjacency(graph.edgelist(as.matrix(my_df), directed=FALSE))
+adjacency_matrix = get.adjacency(graph.edgelist(as.matrix(my_df), directed=FALSE)) + theme(text = element_text(family = "Helvetica, sans-serif"))
 image <- ggnet2(adjacency_matrix, label=TRUE)
 ggsave(file=output_filename, device='svg', plot=image, width=22, height=17)

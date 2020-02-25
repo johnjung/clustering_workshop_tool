@@ -26,5 +26,5 @@ for (i in 1:nrow(my_matrix)) {
 }
 
 hc <- hclust(as.dist(my_matrix), method = args[1])
-image <- ggdendrogram(hc, rotate = TRUE, theme_dendro = FALSE)
+image <- ggdendrogram(hc, rotate = TRUE, theme_dendro = FALSE) + theme(text = element_text(family = "Helvetica, sans-serif"))
 ggsave(file=output_filename, device='svg', plot=image, width=10, height=8)

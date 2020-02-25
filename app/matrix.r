@@ -33,5 +33,5 @@ my_matrix <- cluster_matrix(my_matrix, dim="both", method=args[1])
 
 data <- expand.grid(X=rownames(my_matrix), Y=rownames(my_matrix))
 data$Z <- as.vector(my_matrix)
-image <- ggplot(data, aes(X, Y, fill= Z)) + geom_tile() + theme(axis.text.x = element_text(angle=90, hjust=1))
+image <- ggplot(data, aes(X, Y, fill= Z)) + geom_tile() + theme(axis.text.x = element_text(angle=90, hjust=1), text = element_text(family = "Helvetica, sans-serif"))
 ggsave(file=output_filename, device='svg', plot=image, width=10, height=8)
