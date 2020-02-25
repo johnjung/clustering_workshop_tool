@@ -3,50 +3,14 @@ COPY ./app /app
 RUN pip install --upgrade pip
 RUN pip install -r /app/requirements.txt
 
-# RUN apt install apt-transport-https software-properties-common
-# RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
-# RUN add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/'
-# RUN apt-get update
+RUN apt-get update
+#RUN apt-get install -y dirmngr apt-transport-https ca-certificates software-properties-common gnupg gpgv
+RUN apt-get install -y dirmngr apt-transport-https ca-certificates software-properties-common gnupg2
+RUN apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
+RUN add-apt-repository 'deb https://cloud.r-project.org/bin/linux/debian stretch-cran35/'
 
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends \
-		ed \
-		less \
-		locales \
-		vim-tiny \
-		wget \
-		ca-certificates \
-		fonts-texgyre \
-	&& rm -rf /var/lib/apt/lists/*
-
-## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
-RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
-	&& locale-gen en_US.utf8 \
-	&& /usr/sbin/update-locale LANG=en_US.UTF-8
-
-ENV LC_ALL en_US.UTF-8
-ENV LANG en_US.UTF-8
-
-## Use Debian unstable via pinning -- new style via APT::Default-Release
-RUN echo "deb http://http.debian.net/debian sid main" > /etc/apt/sources.list.d/debian-unstable.list \
-        && echo 'APT::Default-Release "testing";' > /etc/apt/apt.conf.d/default
-
-ENV R_BASE_VERSION 3.6.2
-
-## Now install R and littler, and create a link for littler in /usr/local/bin
-RUN apt-get update \
-	&& apt-get install -t unstable -y --no-install-recommends \
-		littler \
-                r-cran-littler \
-		r-base=${R_BASE_VERSION}-* \
-		r-base-dev=${R_BASE_VERSION}-* \
-		r-recommended=${R_BASE_VERSION}-* \
-	&& ln -s /usr/lib/R/site-library/littler/examples/install.r /usr/local/bin/install.r \
-	&& ln -s /usr/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r \
-	&& ln -s /usr/lib/R/site-library/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
-	&& ln -s /usr/lib/R/site-library/littler/examples/testInstalled.r /usr/local/bin/testInstalled.r \
-	&& install.r docopt \
-	&& rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
-	&& rm -rf /var/lib/apt/lists/*
+RUN apt-get update
+RUN apt-get install -y r-base
+RUN apt-get install -y build-essential
 
 RUN Rscript /app/install.r
