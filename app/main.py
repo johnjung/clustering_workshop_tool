@@ -28,9 +28,10 @@ def get_svg_response(svg_string, svg_filename):
     """
     Get a Flask Response to return a named SVG file.
     """
-    r = Response(svg_string, mimetype="image/svg+xml", direct_passthrough=True)
-    r.headers['Content-Disposition'] = 'attachment; filename="{}"'.format(svg_filename)
-    return r
+    return Response(svg_string, mimetype="image/svg+xml")
+    # r = Response(svg_string, mimetype="image/svg+xml", direct_passthrough=True)
+    # r.headers['Content-Disposition'] = 'attachment; filename="{}"'.format(svg_filename)
+    # return r
 
 @app.route("/")
 def form():
@@ -82,8 +83,6 @@ def cluster():
     else:
         raise NotImplementedError
 
-'''
 if __name__ == "__main__":
     # debug only
     app.run(host='0.0.0.0', debug=True, port=80)
-'''

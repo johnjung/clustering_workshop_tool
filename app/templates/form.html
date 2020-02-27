@@ -1,36 +1,110 @@
 <!doctype html>
 <html lang="en">
 <title>Clustering Workshop Tool</title>
+<head>
+<style>
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+/*
+ * MAIN
+ */
+
+body {
+    font-family: Helvetica, sans-serif;
+}
+h1 {
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 1em;
+}
+h3 {
+    font-weight: bold;
+    margin-bottom: .5em;
+}
+i {
+    font-style: italic;
+}
+p {
+    margin-bottom: 1em;
+}
+</style>
+</head>
+<body style="margin: 2em;">
 <nav>
   <h1>Clustering Workshop Tool</h1>
 </nav>
 
-<p>Enter your data in <a href="https://google.com/sheets">Google Sheets</a>.
-Click the "Share" button in the upper right hand corner of the screen. Be sure
-link sharing is set to allow access to the file.</p>
-
 <form action="/cluster" method="post">
     <h3><label for="url">Google Sheets URL</label></h3>
     <p>
-        <input id="url" name="url" type="text"><br>
-    </p>
-    <h3>Linkage Method</h3>
+        <input id="url" name="url" style="width: calc(100% - 8px);" type="text"><br>
+    <i>Enter your data in <a href="https://google.com/sheets">Google Sheets</a>.
+    Click the "Share" button in the upper right hand corner of the screen. Be sure
+    link sharing is set to "Anyone on the internet can find and view."</i></p>
+
+    <h3>Image Output Type</h3>
     <p>
-        <input checked="checked" name="linkage" type="radio" value="complete"> <label for="linkage">Complete</label><br>
-        <input name="linkage" type="radio" value="single"> <label for="linkage">Single</label>
-    </p>
-    <h3>Output</h3>
-    <p>
-        <input name="output" type="radio" value="graph"> <label for="output">Graph</label><br>
+        <input checked="checked" name="output" type="radio" value="graph"> <label for="output">Graph</label><br>
         <input name="output" type="radio" value="dendrogram"> <label for="output">Dendrogram</label><br>
-        <input checked="checked" name="output" type="radio" value="matrix"> <label for="output">Matrix</label>
+        <input name="output" type="radio" value="matrix"> <label for="output">Matrix</label>
     </p>
-    <h3>Cutoff (for graph output only)</h3>
+    <h3>Linkage Method (for dendrogram or matrices)</h3>
     <p>
-        <select name="cutoff">
-            <option selected="selected" value="2">2</option>
-            <option value="1">1</option>
-        </select>
+        <input name="linkage" type="radio" value="single"> <label for="linkage">Single</label><br>
+        <input checked="checked" name="linkage" type="radio" value="complete"> <label for="linkage">Complete</label><br>
+        <input name="linkage" type="radio" value="ward"> <label for="linkage">Ward</label><br>
+        <i>See <a href="https://www.rdocumentation.org/packages/mdendro/versions/1.0.1/topics/linkage">linkage methods</a> in the R documentation for more information.</i></p>
+    <h3>Edge Cutoff (for graphs)</h3>
+    <p>
+        <input checked="checked" name="cutoff" type="radio" value="1"><label for="cutoff">1</label><br>
+        <input name="cutoff" type="radio" value="2"><label for="cutoff">2</label>
     </p>
     <p>
         <input type="submit">
