@@ -4,7 +4,7 @@ RUN pip install --upgrade pip
 RUN pip install -r /app/requirements.txt
 
 RUN apt-get update
-RUN apt-get install -y dRUN apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'irmngr apt-transport-https ca-certificates software-properties-common gnupg2
+RUN apt-get install -y dirmngr apt-transport-https ca-certificates software-properties-common gnupg2
 
 # add key and repo
 RUN mkdir -p ~/.gnupg
