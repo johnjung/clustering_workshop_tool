@@ -40,4 +40,4 @@ my_df = data.frame(column_a, column_b)
 
 adjacency_matrix = get.adjacency(graph.edgelist(as.matrix(my_df), directed=FALSE))
 image <- ggnet2(adjacency_matrix, label=TRUE) + theme(text = element_text(family = "Helvetica, sans-serif"))
-ggsave(file=output_filename, device='svg', plot=image, width=22, height=17)
+ggsave(file=output_filename, device='svg', plot=image, width=17, height=11)
