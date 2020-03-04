@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type="text/css">
+        div#chart {
+            height: calc(100vmin - 20px);
+            margin: 10px auto;
+            width: calc(100vmin - 20px);
+        }
+        
+        body {
+            font-family: Helvetica, sans-serif;
+            margin: 0;
+        }
+        h1 {
+            bottom: 0px;
+            position: absolute;
+            text-align: center;
+            width: 100%;
+        }
+        html {
+            margin: 0;
+        }
+        svg {
+            background-color: #eee;
+        }
+        .svg-container {
+            display: inline-block;
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%; /* aspect ratio */
+            vertical-align: top;
+            overflow: hidden;
+        }
+        .svg-content-responsive {
+            display: inline-block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .node {}
+
+        .link { stroke: #ccc; stroke-opacity: 1.0; stroke-width: 1px; }
+    </style>
+</head>
+<body>
+<div id="chart"></div>
+<h1><span id="thing_one">Thing One</span> vs. <span id="thing_two">Thing Two</span></h1>
+<script src="https://d3js.org/d3.v4.min.js" type="text/javascript"></script>
+<script src="https://d3js.org/d3-selection-multi.v1.js"></script>
+
+<script type="text/javascript">
+    /* need to be able to add something to the graph dynamically. */
+    /* https://tomroth.com.au/fdg-basics/ */
+    /* https://bl.ocks.org/mbostock/1095795 */
+
+    var times = 0;
+
+    /* capture 0, 1, 2, 3 from the keyboard... */
+    document.addEventListener('keydown', function(e) {
+        var nodes = [
+          {
+            "name": "Apple",
+            "id": 1
+          }
+        ];
+        var edges = [
+          {
+            "source": 1,
+            "target": 2,
+          }
+        ];
+
+        if (['0', '1', '2', '3'].includes(e.key)) {
+            if (times == 1) {
+                nodes.push({"name": "Orange", "id": 2});
+                edges.push({"source": 1, "target": 2});
+            } else if (times == 2) {
+                nodes.push({"name": "Banana", "id": 3});
+                edges.push({"source": 1, "target": 3});
+                edges.push({"source": 2, "target": 3});
+            } else if (times == 3) {
+                nodes.push({"name": "Pear", "id": 4});
+                edges.push({"source": 3, "target": 4});
+            }        
+            update(edges, nodes);
+            times += 1;
+        }
+    });
+
+    var width = 600,
+        height = 600,
+        node,
+        link;
+
+    d3.select('div#chart')
+        .append('div')
+        .classed('svg-container', true)
+        .append('svg')
+       .attr("preserveAspectRatio", "xMinYMin meet")
+       .attr("viewBox", "0 0 600 600")
+       .classed("svg-content-responsive", true);
+
+    var svg = d3.select("svg");
+
+    svg.append('defs').append('marker')
+        .append('svg:path')
+        .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+        .attr('fill', '#999')
+        .style('stroke','none');
+
+    var simulation = d3.forceSimulation()
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("link", d3.forceLink().id(function (d) {return d.id;}).distance(100).strength(1))
+        .force("charge", d3.forceManyBody());
+
+    function update(links, nodes) {
+        link = svg.selectAll(".link")
+            .data(links)
+            .enter()
+            .append("line")
+            .attr("class", "link");
+
+        node = svg.selectAll(".node")
+            .data(nodes)
+            .enter()
+            .append("circle")
+            .attr("class", "node")
+            .attr("r", 5)
+            .attr("fill", "#ccc")
+            .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+            );
+
+        simulation
+            .nodes(nodes)
+            .on("tick", ticked);
+
+        // some kind of problem with this...
+        simulation.force("link")
+            .links(links);
+    }
+
+    function ticked() {
+        node
+            .attr("cx", function (d) {return d.x;})
+            .attr("cy", function (d) {return d.y;});
+
+        link
+            .attr("x1", function (d) {return d.source.x;})
+            .attr("y1", function (d) {return d.source.y;})
+            .attr("x2", function (d) {return d.target.x;})
+            .attr("y2", function (d) {return d.target.y;});
+    }
+
+    function dragstarted(d) {
+        if (!d3.event.active) simulation.alphaTarget(0.3).restart()
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(d) {
+        d.fx = d3.event.x;
+        d.fy = d3.event.y;
+    }
+
+</script>
+
+</body>
+</html>
